@@ -42,6 +42,7 @@ module.exports = {
   optimization: {
     //标记模块是否被使用
     usedExports: true,
-  }
+  },
+  devtool: 'source-map'
 
 }

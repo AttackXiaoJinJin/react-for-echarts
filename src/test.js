@@ -69,19 +69,26 @@ const option = {
   ]
 };
 
+export const loadStyle = {
+  text: '正在加载。。。',
+  color: '#c23531',
+  textColor: '#000',
+  maskColor: 'rgba(255, 255, 255, 1)',
+  zlevel: 10,
+};
+
 function App() {
 
   return (
     <div>
       <ReactEcharts
         style={{
-          height: 800,
-          width: '100%',
-          marginTop: -55,
+          height: 400,
+          width: 400,
         }}
         option={option}
         // loadingOption={loadStyle}
-        // showLoading={memberAgeLoading}
+        // showLoading={true}
         notMerge
       />
   </div>
