@@ -224,7 +224,7 @@ ReactForEchartsCore.defaultProps={
   // onChartReady:()=>{},
   showLoading:false,
   loadingOption:null,
-  // eventsObj:{},
+  eventsObj:{},
   // opts:{},
   // shouldSetOption:()=>true,
 
@@ -242,7 +242,7 @@ ReactForEchartsCore.propTypes={
   // onChartReady:PropTypes.func,
   showLoading:PropTypes.bool,
   loadingOption:PropTypes.object,
-  // eventsObj:PropTypes.object,
+  eventsObj:PropTypes.object,
   // opts: PropTypes.shape({
   //   devicePixelRatio: PropTypes.number,
   //   renderer: PropTypes.oneOf(['canvas', 'svg']),
