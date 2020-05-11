@@ -60,33 +60,47 @@ export default class ReactForEchartsCore extends Component{
     return echartObj
   }
 
-  // // bind the events
-  // bindEvents = (instance, events) => {
-  //   const _bindEvent = (eventName, func) => {
-  //     // ignore the event config which not satisfy
-  //     if (typeof eventName === 'string' && typeof func === 'function') {
-  //       // binding event
-  //       // instance.off(eventName); // 已经 dispose 在重建，所以无需 off 操作
-  //       instance.on(eventName, (param) => {
-  //         func(param, instance);
-  //       });
-  //     }
-  //   };
-  //
-  //   // loop and bind
-  //   for (const eventName in events) {
-  //     if (Object.prototype.hasOwnProperty.call(events, eventName)) {
-  //       _bindEvent(eventName, events[eventName]);
-  //     }
-  //   }
-  // };
+  //绑定 Events 事件
+  //echartObj,eventsObj
+  bindEvents = (instance, eventsObj) => {
+    const bindEvent = (eventName, func) => {
+      // ignore the event config which not satisfy
+      /*eventName 类型必须为 string，func 类型必须为 function*/
+      if (typeof eventName === 'string' && typeof func === 'function') {
+        // binding event
+        // instance.off(eventName); // 已经 dispose 在重建，所以无需 off 操作
+
+        /*这里暂不支持官网的筛选项*/
+        //不支持：
+        // chart.on('mouseover', {seriesName: 'uuu'}, function () {
+        //    series name 为 'uuu' 的系列中的图形元素被 'mouseover' 时，此方法被回调。
+        // });
+        instance.on(eventName, (param) => {
+          func(param, instance);
+        });
+      }
+    };
+
+    // loop and bind
+    //暴露的eventsObj使用示例：
+    // {
+    //  click:()=>{},
+    //  legendselectchanged:()=>{},
+    // }
+    for (const eventName in eventsObj) {
+      //除去原型链上的属性，如 Object.keys()
+      if (Object.prototype.hasOwnProperty.call(eventsObj, eventName)) {
+        bindEvent(eventName, eventsObj[eventName]);
+      }
+    }
+  };
 
   runEchartInstance=()=>{
     //获取 <ReactEcharts/> 传进来的
-    const {onEvents,onChartReady}=this.props
-    //todo:
+    const {eventsObj,onChartReady}=this.props
     const echartObj=this.configEchartInstance()
-    // this.bindEvents(echartObj,onEvents||{})
+    //绑定 eventsObj 事件
+    this.bindEvents(echartObj,eventsObj||{})
 
     // if(typeof onChartReady==='function'){
     //   onChartReady(echartObj)
@@ -105,19 +119,22 @@ export default class ReactForEchartsCore extends Component{
 
   }
 
-  // // dispose echarts and clear size-sensor
-  // dispose = () => {
-  //   const {echartsRef,oriEcharts}=this
-  //   if (echartsRef) {
-  //     try {
-  //       clear(echartsRef);
-  //     } catch (e) {
-  //       console.warn(e);
-  //     }
-  //     // dispose echarts instance
-  //     oriEcharts.dispose(echartsRef);
-  //   }
-  // };
+  //dispose echarts and clear size-sensor
+  //取消之前的绑定 events
+  disposeEchartsInstance = () => {
+    const {echartsRef,oriEcharts}=this
+    if (echartsRef) {
+      try {
+        //清空当前实例
+        clear(echartsRef);
+      } catch (e) {
+        console.warn(e);
+      }
+      //摧毁实例
+      //因为下面是 rebind，会重新创建实例，这里干脆就 destory 了
+      oriEcharts.dispose(echartsRef);
+    }
+  };
 
   // update
   componentDidUpdate(prevProps) {
@@ -126,29 +143,34 @@ export default class ReactForEchartsCore extends Component{
     //   return;
     // }
 
+    const {eventsObj,}=this.props
+    const {eventsObjPre,}=prevProps
+
     // 以下属性修改的时候，需要 dispose 之后再新建
     // 1. 切换 theme 的时候
     // 2. 修改 opts 的时候
-    // 3. 修改 onEvents 的时候，这样可以取消所有之前绑定的事件 issue #151
-    // if (
+    // 3. 修改 eventsObj 的时候，这样可以取消所有之前绑定的事件 issue #151
+    if (
     //   !isEqual(prevProps.theme, this.props.theme) ||
     //   !isEqual(prevProps.opts, this.props.opts) ||
-    //   !isEqual(prevProps.onEvents, this.props.onEvents)
-    // ) {
-    //   this.dispose();
-    //
-    //   this.runEchartInstance(); // 重建
-    //   return;
-    // }
+      !objectIs(eventsObjPre, eventsObj)
+    ) {
+      //cancel-bind
+      this.disposeEchartsInstance();
+      //configEchartInstance
+      //re-bindEvent
+      this.runEchartInstance();
+      return;
+    }
 
-    // 当这些属性保持不变的时候，不执行 update
+    // 当 setOption 属性保持不变的时候，不执行 update
     const {option,notMerge,showLoading,loadingOption, lazyUpdate,}=this.props
     const {ptionPre,notMergePre,showLoadingPre,loadingOptionPre, lazyUpdatePre,}=prevProps
     // const pickKeys = ['option', 'notMerge', 'lazyUpdate', 'showLoading', 'loadingOption'];
     // if (isEqual(pick(this.props, pickKeys), pick(prevProps, pickKeys))) {
     //   return;
     // }
-    //
+
     if(
       objectIs(option,ptionPre)&&
       objectIs(notMerge,notMergePre)&&
@@ -170,10 +192,10 @@ export default class ReactForEchartsCore extends Component{
     // }
   }
 
-  // // remove
-  // componentWillUnmount() {
-  //   this.dispose();
-  // }
+  // remove
+  componentWillUnmount() {
+    this.disposeEchartsInstance();
+  }
 
   render(){
     const {style,className}=this.props
@@ -202,7 +224,7 @@ ReactForEchartsCore.defaultProps={
   // onChartReady:()=>{},
   showLoading:false,
   loadingOption:null,
-  // onEvents:{},
+  // eventsObj:{},
   // opts:{},
   // shouldSetOption:()=>true,
 
@@ -220,7 +242,7 @@ ReactForEchartsCore.propTypes={
   // onChartReady:PropTypes.func,
   showLoading:PropTypes.bool,
   loadingOption:PropTypes.object,
-  // onEvents:PropTypes.object,
+  // eventsObj:PropTypes.object,
   // opts: PropTypes.shape({
   //   devicePixelRatio: PropTypes.number,
   //   renderer: PropTypes.oneOf(['canvas', 'svg']),
