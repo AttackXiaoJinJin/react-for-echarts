@@ -1,5 +1,5 @@
 import ReactEcharts from './index'
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import ReactDOM from 'react-dom';
 
 const option = {
@@ -78,6 +78,15 @@ export const loadStyle = {
 };
 
 function App() {
+  const [isLoading,setLoading]=useState(true)
+
+  useEffect(()=>{
+    setTimeout(()=>{
+      setLoading(false)
+    },2000)
+  },[])
+  
+  console.log(isLoading,'isLoading89')
 
   return (
     <div>
@@ -88,7 +97,7 @@ function App() {
         }}
         option={option}
         // loadingOption={loadStyle}
-        // showLoading={true}
+        showLoading={isLoading}
         notMerge
       />
   </div>
