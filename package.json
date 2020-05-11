@@ -1,12 +1,20 @@
 {
   "name": "react-for-echarts",
   "version": "1.0.0",
+  "description": "a simple React wrapper for Echarts",
+  "homepage": "https://github.com/AttackXiaoJinJin/react-for-echarts",
+  "repository": "https://github.com/AttackXiaoJinJin/react-for-echarts",
+  "bugs": "https://github.com/AttackXiaoJinJin/react-for-echarts/issues",
+  "keywords": [
+    "echarts",
+    "react-for-echarts"
+  ],
+  "author": "webchen",
   "main": "index.js",
   "scripts": {
     "build": "webpack --watch",
     "start": "webpack-dev-server "
   },
-  "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.9.6",
     "@babel/polyfill": "^7.8.7",
@@ -27,5 +35,6 @@
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0",
     "yarn": "^1.22.4"
-  }
+  },
+  "license": "MIT"
 }
